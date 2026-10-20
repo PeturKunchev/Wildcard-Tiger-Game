@@ -2,6 +2,7 @@ import { Container, Graphics, Sprite } from "pixi.js";
 import Scene from "../core/Scene";
 import Bar from "../preflabs/Bars";
 import GameLogic from "./GameLogic";
+import WinAnimation from "../preflabs/WinAnimation";
 
 export default class Game extends Scene {
   name = "Game";
@@ -9,10 +10,12 @@ export default class Game extends Scene {
   private background?: Sprite;
   private cage?: Sprite;
   private tiger?: Sprite;
+  private winText?: Sprite;
   private isAnimating: boolean = false;
   private bars: Bar[] = [];
   private openedBars: Bar[] = [];
   private plate?: Sprite;
+  private winAnimation?: WinAnimation;
   private gameContainer = new Container();
   private containerOutline = new Graphics();
   private gameLogic = new GameLogic();
@@ -32,6 +35,8 @@ export default class Game extends Scene {
     leftBarXRatio: 0.13,
     rightBarXRatio: 0.53,
     barRowYRatios: [0.35, 0.55, 0.75],
+    winTextWidth: 1600,
+    winTextHeightOffset: 350,
   };
   private async resetBars() {
     await Promise.all(this.openedBars.map((bar) => bar.close()));
@@ -73,23 +78,15 @@ export default class Game extends Scene {
     this.cage = Sprite.from("cage");
     this.tiger = Sprite.from("tiger");
     this.plate = Sprite.from("plate");
+    this.winText = Sprite.from("txt");
     this.addChild(this.background);
     this.addChild(this.gameContainer);
-    // Temporary outline to visualize the game container.
-    this.containerOutline.lineStyle(
-      this.layout.outlineThickness,
-      this.layout.outlineColor
-    );
-    this.containerOutline.drawRect(
-      0,
-      0,
-      this.layout.designWidth,
-      this.layout.designHeight
-    );
+
     this.gameContainer.addChild(this.containerOutline);
     this.gameContainer.addChild(this.cage);
     this.gameContainer.addChild(this.tiger);
     this.gameContainer.addChild(this.plate);
+    this.gameContainer.addChild(this.winText);
 
     const cageWidth = this.layout.cageWidth;
     const cageScale = cageWidth / this.cage.texture.width;
@@ -111,6 +108,19 @@ export default class Game extends Scene {
       (this.layout.designHeight - this.tiger.height) / 2 +
         this.layout.tigerHeightOffset
     );
+
+    const winTextWidth = this.layout.winTextWidth;
+    const winTextScale = winTextWidth / this.winText.texture.width;
+
+    this.winText.scale.set(winTextScale);
+
+    this.winText.position.set(
+      (this.layout.designWidth - this.winText.width) / 2,
+      (this.layout.designHeight - this.winText.height) / 2 +
+        this.layout.winTextHeightOffset
+    );
+
+    this.winAnimation = new WinAnimation(this.tiger, this.winText);
 
     const plateScale = this.layout.plateHeight / this.plate.texture.height;
     this.plate.scale.set(plateScale);
@@ -165,7 +175,10 @@ export default class Game extends Scene {
 
   start() {
     this.gameLogic.setOnReset(() => {
-      void this.resetBars();
+      void Promise.all([this.resetBars(), this.winAnimation?.reset()]);
+    });
+    this.gameLogic.setOnWin(() => {
+      void this.winAnimation?.play();
     });
     this.gameLogic.generateSequence();
     this.onResize(window.innerWidth, window.innerHeight);
