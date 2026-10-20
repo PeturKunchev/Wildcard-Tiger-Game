@@ -7,6 +7,7 @@ export default class Game extends Scene {
   private background?: Sprite;
   private cage?: Sprite;
   private tiger?: Sprite;
+  private plate?: Sprite;
   private gameContainer = new Container();
   private containerOutline = new Graphics();
   private readonly layout = {
@@ -16,8 +17,10 @@ export default class Game extends Scene {
     cageWidth: 1200,
     outlineColor: 0xff0000,
     outlineThickness: 4,
-    tigerHeightOffset: 80, 
+    tigerHeightOffset: 80,
     tigerWidth: 800,
+    plateHeight: 750,
+    plateLeftOffset: -450,
   };
 
   async load() {
@@ -26,6 +29,7 @@ export default class Game extends Scene {
     this.background = Sprite.from("background");
     this.cage = Sprite.from("cage");
     this.tiger = Sprite.from("tiger");
+    this.plate = Sprite.from("plate");
     this.addChild(this.background);
     this.addChild(this.gameContainer);
 
@@ -44,6 +48,8 @@ export default class Game extends Scene {
     this.gameContainer.addChild(this.containerOutline);
     this.gameContainer.addChild(this.cage);
     this.gameContainer.addChild(this.tiger);
+    this.gameContainer.addChild(this.plate);
+
     const cageWidth = this.layout.cageWidth;
     const cageScale = cageWidth / this.cage.texture.width;
 
@@ -53,6 +59,7 @@ export default class Game extends Scene {
       (this.layout.designWidth - this.cage.width) / 2,
       (this.layout.designHeight - this.cage.height) / 2
     );
+
     const tigerWidth = this.layout.tigerWidth;
     const tigerScale = tigerWidth / this.tiger.texture.width;
 
@@ -62,6 +69,14 @@ export default class Game extends Scene {
       (this.layout.designWidth - this.tiger.width) / 2,
       (this.layout.designHeight - this.tiger.height) / 2 +
         this.layout.tigerHeightOffset
+    );
+
+    const plateScale = this.layout.plateHeight / this.plate.texture.height;
+    this.plate.scale.set(plateScale);
+
+    this.plate.position.set(
+      this.layout.plateLeftOffset,
+      (this.layout.designHeight - this.plate.height) / 2
     );
   }
 
