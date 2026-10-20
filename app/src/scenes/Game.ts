@@ -1,5 +1,6 @@
 import { Container, Graphics, Sprite } from "pixi.js";
 import Scene from "../core/Scene";
+import Bar from "../preflabs/Bars";
 
 export default class Game extends Scene {
   name = "Game";
@@ -8,6 +9,7 @@ export default class Game extends Scene {
   private cage?: Sprite;
   private tiger?: Sprite;
   private plate?: Sprite;
+  private bars: Bar[] = [];
   private gameContainer = new Container();
   private containerOutline = new Graphics();
   private readonly layout = {
@@ -21,6 +23,11 @@ export default class Game extends Scene {
     tigerWidth: 800,
     plateHeight: 750,
     plateLeftOffset: -450,
+    barCount: 3,
+    barWidthRatio: 0.34,
+    leftBarXRatio: 0.13,
+    rightBarXRatio: 0.53,
+    barRowYRatios: [0.35, 0.55, 0.75],
   };
 
   async load() {
@@ -44,7 +51,6 @@ export default class Game extends Scene {
       this.layout.designWidth,
       this.layout.designHeight
     );
-
     this.gameContainer.addChild(this.containerOutline);
     this.gameContainer.addChild(this.cage);
     this.gameContainer.addChild(this.tiger);
@@ -78,6 +84,38 @@ export default class Game extends Scene {
       this.layout.plateLeftOffset,
       (this.layout.designHeight - this.plate.height) / 2
     );
+
+    const cageLeft = this.cage.x;
+    const cageTop = this.cage.y;
+    const cageHeight = this.cage.height;
+
+    const barWidth = cageWidth * this.layout.barWidthRatio;
+
+    const leftX = cageLeft + cageWidth * this.layout.leftBarXRatio;
+    const rightX = cageLeft + cageWidth * this.layout.rightBarXRatio;
+
+    const rowYPositions = [
+      cageTop + cageHeight * this.layout.barRowYRatios[0],
+      cageTop + cageHeight * this.layout.barRowYRatios[1],
+      cageTop + cageHeight * this.layout.barRowYRatios[2],
+    ];
+
+    for (let i = 0; i < this.layout.barCount; i++) {
+      const leftBar = new Bar();
+      leftBar.setSize(barWidth);
+      leftBar.position.set(leftX, rowYPositions[i]);
+      this.bars.push(leftBar);
+      this.gameContainer.addChild(leftBar);
+    }
+
+    for (let i = 0; i < this.layout.barCount; i++) {
+      const rightBar = new Bar();
+      rightBar.setSize(barWidth);
+      rightBar.setFlipped(true);
+      rightBar.position.set(rightX, rowYPositions[i]);
+      this.bars.push(rightBar);
+      this.gameContainer.addChild(rightBar);
+    }
   }
 
   start() {
