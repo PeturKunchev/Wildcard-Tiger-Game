@@ -1,17 +1,26 @@
-
-import { Container, Sprite } from "pixi.js";
+import { Container, Sprite, Text } from "pixi.js";
 
 export default class Bar extends Container {
   private shadow: Sprite;
   private bar: Sprite;
+  private label: Text;
+
   private readonly shadowOffset = 12;
   constructor() {
     super();
 
     this.shadow = Sprite.from("barShadow");
     this.bar = Sprite.from("bar");
+    this.label = new Text("", {
+      fontFamily: "Arial",
+      fontSize: 35,
+      fill: "red",
+      fontWeight: "bold",
+    });
 
+    this.label.anchor.set(0.5);
     this.addChild(this.shadow, this.bar);
+    this.addChild(this.label);
   }
 
   setSize(width: number) {
@@ -24,7 +33,7 @@ export default class Bar extends Container {
     this.bar.position.set(0, 0);
   }
 
-   setFlipped(flipped: boolean) {
+  setFlipped(flipped: boolean) {
     const direction = flipped ? -1 : 1;
 
     this.bar.scale.x = Math.abs(this.bar.scale.x) * direction;
@@ -35,4 +44,17 @@ export default class Bar extends Container {
     this.bar.x = flipped ? width : 0;
     this.shadow.x = flipped ? width : 0;
   }
+
+  setNumber(number: number, flipped = false) {
+  this.label.text = String(number);
+
+  const endPadding = this.bar.width * 0.07;
+
+  this.label.position.set(
+    flipped
+      ? this.bar.width - endPadding
+      : endPadding,
+    this.bar.height / 2,
+  );
+}
 }
