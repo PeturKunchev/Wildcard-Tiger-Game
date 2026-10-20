@@ -1,6 +1,7 @@
 import { Container, Graphics, Sprite } from "pixi.js";
 import Scene from "../core/Scene";
 import Bar from "../preflabs/Bars";
+import GameLogic from "./GameLogic";
 
 export default class Game extends Scene {
   name = "Game";
@@ -12,6 +13,7 @@ export default class Game extends Scene {
   private bars: Bar[] = [];
   private gameContainer = new Container();
   private containerOutline = new Graphics();
+  private gameLogic = new GameLogic();
   private readonly layout = {
     designWidth: 1280,
     designHeight: 720,
@@ -39,7 +41,6 @@ export default class Game extends Scene {
     this.plate = Sprite.from("plate");
     this.addChild(this.background);
     this.addChild(this.gameContainer);
-
     // Temporary outline to visualize the game container.
     this.containerOutline.lineStyle(
       this.layout.outlineThickness,
@@ -103,8 +104,11 @@ export default class Game extends Scene {
     for (let i = 0; i < this.layout.barCount; i++) {
       const leftBar = new Bar();
       leftBar.setSize(barWidth);
-      leftBar.setNumber(i+1);
+      leftBar.setNumber(i + 1);
       leftBar.position.set(leftX, rowYPositions[i]);
+      leftBar.setOnClick(() => {
+        this.gameLogic.checkSelection(i + 1);
+      });
       this.bars.push(leftBar);
       this.gameContainer.addChild(leftBar);
     }
@@ -115,12 +119,16 @@ export default class Game extends Scene {
       rightBar.setNumber(i + 4, true);
       rightBar.setFlipped(true);
       rightBar.position.set(rightX, rowYPositions[i]);
+      rightBar.setOnClick(() => {
+        this.gameLogic.checkSelection(i + 4);
+      });
       this.bars.push(rightBar);
       this.gameContainer.addChild(rightBar);
     }
   }
 
   start() {
+    this.gameLogic.generateSequence();
     this.onResize(window.innerWidth, window.innerHeight);
   }
 

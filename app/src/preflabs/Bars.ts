@@ -46,15 +46,19 @@ export default class Bar extends Container {
   }
 
   setNumber(number: number, flipped = false) {
-  this.label.text = String(number);
+    this.label.text = String(number);
 
-  const endPadding = this.bar.width * 0.07;
+    const endPadding = this.bar.width * 0.07;
 
-  this.label.position.set(
-    flipped
-      ? this.bar.width - endPadding
-      : endPadding,
-    this.bar.height / 2,
-  );
-}
+    this.label.position.set(
+      flipped ? this.bar.width - endPadding : endPadding,
+      this.bar.height / 2
+    );
+  }
+
+  setOnClick(callback: () => void){
+    this.eventMode = "static";
+    this.cursor = "pointer";
+    this.on("pointertap", callback);
+  }
 }
