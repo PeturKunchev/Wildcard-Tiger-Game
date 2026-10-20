@@ -1,11 +1,19 @@
+import gsap from "gsap";
+
 export default class GameLogic {
-    
   private sequence: number[] = [];
   private currentIndex: number = 0;
+  private onWin?: () => void;
+  private isWon = false;
+  private onReset?: () => void;
 
+  setOnReset(callback: () => void): void {
+    this.onReset = callback;
+  }
   generateSequence(): number[] {
     const numbers = [1, 2, 3, 4, 5, 6];
     this.currentIndex = 0;
+    this.isWon = false;
     for (let i = numbers.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
 
@@ -19,12 +27,17 @@ export default class GameLogic {
   }
 
   resetGame(): void {
-  this.currentIndex = 0;
-  this.generateSequence();
-  console.log("Game reset. Start again!");
-}
-
+    this.currentIndex = 0;
+    this.generateSequence();
+    console.log("Game reset. Start again!");
+  }
+  setOnWin(callback: () => void): void {
+    this.onWin = callback;
+  }
   checkSelection(number: number): boolean {
+    if (this.isWon) {
+      return false;
+    }
     const expectedNumber = this.sequence[this.currentIndex];
 
     if (number !== expectedNumber) {
@@ -37,6 +50,12 @@ export default class GameLogic {
     this.currentIndex++;
     if (this.currentIndex === this.sequence.length) {
       console.log("All bars opened!");
+      this.isWon = true;
+      this.onWin?.();
+      gsap.delayedCall(5, () => {
+        this.resetGame();
+        this.onReset?.();
+      });
     }
 
     return true;

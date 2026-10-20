@@ -9,8 +9,10 @@ export default class Game extends Scene {
   private background?: Sprite;
   private cage?: Sprite;
   private tiger?: Sprite;
-  private plate?: Sprite;
+  private isAnimating: boolean = false;
   private bars: Bar[] = [];
+  private openedBars: Bar[] = [];
+  private plate?: Sprite;
   private gameContainer = new Container();
   private containerOutline = new Graphics();
   private gameLogic = new GameLogic();
@@ -31,7 +33,39 @@ export default class Game extends Scene {
     rightBarXRatio: 0.53,
     barRowYRatios: [0.35, 0.55, 0.75],
   };
+  private async resetBars() {
+    await Promise.all(this.openedBars.map((bar) => bar.close()));
 
+    this.openedBars = [];
+
+    this.bars.forEach((bar) => {
+      bar.setClickable(true);
+    });
+  }
+  private async handleBarClick(bar: Bar, number: number, direction: number) {
+    if (this.isAnimating) {
+      return;
+    }
+    bar.setClickable(false);
+    const isCorrect = this.gameLogic.checkSelection(number);
+    if (!isCorrect) {
+      this.isAnimating = true;
+
+      await Promise.all([
+        bar.open(direction * bar.width * 0.25),
+        this.resetBars(),
+      ]);
+
+      await bar.close();
+
+      this.isAnimating = false;
+      return;
+    }
+    this.isAnimating = true;
+    await bar.open(direction * bar.width);
+    this.openedBars.push(bar);
+    this.isAnimating = false;
+  }
   async load() {
     await this.utils.assetLoader.loadAssetsGroup("Game");
 
@@ -107,8 +141,9 @@ export default class Game extends Scene {
       leftBar.setNumber(i + 1);
       leftBar.position.set(leftX, rowYPositions[i]);
       leftBar.setOnClick(() => {
-        this.gameLogic.checkSelection(i + 1);
+        void this.handleBarClick(leftBar, i + 1, -1);
       });
+      leftBar.setOriginalPosition();
       this.bars.push(leftBar);
       this.gameContainer.addChild(leftBar);
     }
@@ -120,14 +155,18 @@ export default class Game extends Scene {
       rightBar.setFlipped(true);
       rightBar.position.set(rightX, rowYPositions[i]);
       rightBar.setOnClick(() => {
-        this.gameLogic.checkSelection(i + 4);
+        void this.handleBarClick(rightBar, i + 4, 1);
       });
+      rightBar.setOriginalPosition();
       this.bars.push(rightBar);
       this.gameContainer.addChild(rightBar);
     }
   }
 
   start() {
+    this.gameLogic.setOnReset(() => {
+      void this.resetBars();
+    });
     this.gameLogic.generateSequence();
     this.onResize(window.innerWidth, window.innerHeight);
   }

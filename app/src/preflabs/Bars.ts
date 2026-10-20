@@ -1,10 +1,11 @@
+import gsap from "gsap";
 import { Container, Sprite, Text } from "pixi.js";
 
 export default class Bar extends Container {
   private shadow: Sprite;
   private bar: Sprite;
   private label: Text;
-
+  private originalX = 0;
   private readonly shadowOffset = 12;
   constructor() {
     super();
@@ -22,7 +23,14 @@ export default class Bar extends Container {
     this.addChild(this.shadow, this.bar);
     this.addChild(this.label);
   }
+  setOriginalPosition() {
+    this.originalX = this.x;
+  }
 
+  setClickable(clickable: boolean) {
+    this.eventMode = clickable ? "static" : "none";
+    this.cursor = clickable ? "pointer" : "default";
+  }
   setSize(width: number) {
     const scale = width / this.bar.texture.width;
 
@@ -56,9 +64,30 @@ export default class Bar extends Container {
     );
   }
 
-  setOnClick(callback: () => void){
+  setOnClick(callback: () => void) {
+    this.setClickable(true)
     this.eventMode = "static";
     this.cursor = "pointer";
     this.on("pointertap", callback);
+  }
+  open(distance: number): Promise<void> {
+    return new Promise((resolve) => {
+      gsap.to(this, {
+        x: this.x + distance,
+        duration: 0.6,
+        ease: "power2.inOut",
+        onComplete: resolve,
+      });
+    });
+  }
+  close(): Promise<void> {
+    return new Promise((resolve) => {
+      gsap.to(this, {
+        x: this.originalX,
+        duration: 0.6,
+        ease: "power2.inOut",
+        onComplete: resolve,
+      });
+    });
   }
 }
