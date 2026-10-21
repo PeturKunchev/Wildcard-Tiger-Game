@@ -1,8 +1,9 @@
-import { Container, Graphics, Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import Scene from "../core/Scene";
 import Bar from "../preflabs/Bars";
 import GameLogic from "./GameLogic";
 import WinAnimation from "../preflabs/WinAnimation";
+import ProgressMeter from "../preflabs/ProgressBar";
 
 export default class Game extends Scene {
   name = "Game";
@@ -16,8 +17,8 @@ export default class Game extends Scene {
   private openedBars: Bar[] = [];
   private plate?: Sprite;
   private winAnimation?: WinAnimation;
+  private progressMeter?: ProgressMeter;
   private gameContainer = new Container();
-  private containerOutline = new Graphics();
   private gameLogic = new GameLogic();
   private readonly layout = {
     designWidth: 1280,
@@ -39,6 +40,7 @@ export default class Game extends Scene {
     winTextHeightOffset: 350,
   };
   private async resetBars() {
+    this.progressMeter?.setProgress(0);
     await Promise.all(this.openedBars.map((bar) => bar.close()));
 
     this.openedBars = [];
@@ -69,6 +71,7 @@ export default class Game extends Scene {
     this.isAnimating = true;
     await bar.open(direction * bar.width);
     this.openedBars.push(bar);
+    this.progressMeter?.setProgress(this.openedBars.length);
     this.isAnimating = false;
   }
   async load() {
@@ -82,12 +85,12 @@ export default class Game extends Scene {
     this.addChild(this.background);
     this.addChild(this.gameContainer);
 
-    this.gameContainer.addChild(this.containerOutline);
     this.gameContainer.addChild(this.cage);
     this.gameContainer.addChild(this.tiger);
     this.gameContainer.addChild(this.plate);
     this.gameContainer.addChild(this.winText);
-
+    this.progressMeter = new ProgressMeter();
+    this.gameContainer.addChild(this.progressMeter);
     const cageWidth = this.layout.cageWidth;
     const cageScale = cageWidth / this.cage.texture.width;
 
@@ -128,6 +131,11 @@ export default class Game extends Scene {
     this.plate.position.set(
       this.layout.plateLeftOffset,
       (this.layout.designHeight - this.plate.height) / 2
+    );
+
+    this.progressMeter.position.set(
+      this.plate.x + this.plate.width * 0.35,
+      this.plate.y + this.plate.height * 0.25
     );
 
     const cageLeft = this.cage.x;
