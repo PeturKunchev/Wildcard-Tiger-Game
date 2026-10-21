@@ -1,6 +1,7 @@
 import gsap from "gsap";
 
 export default class GameLogic {
+  private readonly winResetDelay = 5;
   private sequence: number[] = [];
   private currentIndex: number = 0;
   private onWin?: () => void;
@@ -52,7 +53,7 @@ export default class GameLogic {
       console.log("All bars opened!");
       this.isWon = true;
       this.onWin?.();
-      gsap.delayedCall(5, () => {
+      gsap.delayedCall(this.winResetDelay, () => {
         this.resetGame();
         this.onReset?.();
       });

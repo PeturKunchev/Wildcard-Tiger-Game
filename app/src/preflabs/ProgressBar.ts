@@ -1,4 +1,5 @@
-import { Container, Graphics, Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
+import { barConfig } from "../config/barConfig";
 
 export default class ProgressMeter extends Container {
   private readonly bars: Sprite[] = [];
@@ -6,27 +7,24 @@ export default class ProgressMeter extends Container {
   constructor() {
     super();
 
-    const barWidth = 160;
-    const barHeight = 50;
-    const gap = 10;
-
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < barConfig.progressBarCount; i++) {
       const bar = Sprite.from("bar");
 
-      bar.width = barWidth;
-      bar.height = barHeight;
-      bar.position.set(0, i * (barHeight + gap));
+      bar.width = barConfig.progressBarWidth;
+      bar.height = barConfig.progressBarHeight;
+      bar.position.set(
+        0,
+        i * (barConfig.progressBarHeight + barConfig.progressBarGap)
+      );
 
       this.bars.push(bar);
       this.addChild(bar);
     }
   }
 
-  setProgress(openedBars: number){
-    console.log(openedBars);
-    
-    this.bars.forEach((bar,index) => {
-        bar.visible = index >= openedBars;
+  setProgress(openedBars: number): void {
+    this.bars.forEach((bar, index) => {
+      bar.visible = index >= openedBars;
     });
   }
 }

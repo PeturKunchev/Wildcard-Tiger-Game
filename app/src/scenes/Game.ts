@@ -4,10 +4,9 @@ import Bar from "../preflabs/Bars";
 import GameLogic from "./GameLogic";
 import WinAnimation from "../preflabs/WinAnimation";
 import ProgressMeter from "../preflabs/ProgressBar";
-
+import { layout } from "../config/layoutConfig";
 export default class Game extends Scene {
   name = "Game";
-
   private background?: Sprite;
   private cage?: Sprite;
   private tiger?: Sprite;
@@ -20,25 +19,8 @@ export default class Game extends Scene {
   private progressMeter?: ProgressMeter;
   private gameContainer = new Container();
   private gameLogic = new GameLogic();
-  private readonly layout = {
-    designWidth: 1280,
-    designHeight: 720,
-    gameAreaWidthRatio: 0.55,
-    cageWidth: 1200,
-    outlineColor: 0xff0000,
-    outlineThickness: 4,
-    tigerHeightOffset: 80,
-    tigerWidth: 800,
-    plateHeight: 750,
-    plateLeftOffset: -450,
-    barCount: 3,
-    barWidthRatio: 0.34,
-    leftBarXRatio: 0.13,
-    rightBarXRatio: 0.53,
-    barRowYRatios: [0.35, 0.55, 0.75],
-    winTextWidth: 1600,
-    winTextHeightOffset: 350,
-  };
+
+
   private async resetBars() {
     this.progressMeter?.setProgress(0);
     await Promise.all(this.openedBars.map((bar) => bar.close()));
@@ -59,7 +41,7 @@ export default class Game extends Scene {
       this.isAnimating = true;
 
       await Promise.all([
-        bar.open(direction * bar.width * 0.25),
+        bar.open(direction * bar.width * layout.wrongBarPercentageOpen),
         this.resetBars(),
       ]);
 
@@ -91,69 +73,69 @@ export default class Game extends Scene {
     this.gameContainer.addChild(this.winText);
     this.progressMeter = new ProgressMeter();
     this.gameContainer.addChild(this.progressMeter);
-    const cageWidth = this.layout.cageWidth;
+    const cageWidth = layout.cageWidth;
     const cageScale = cageWidth / this.cage.texture.width;
 
     this.cage.scale.set(cageScale);
 
     this.cage.position.set(
-      (this.layout.designWidth - this.cage.width) / 2,
-      (this.layout.designHeight - this.cage.height) / 2
+      (layout.designWidth - this.cage.width) / 2,
+      (layout.designHeight - this.cage.height) / 2
     );
 
-    const tigerWidth = this.layout.tigerWidth;
+    const tigerWidth = layout.tigerWidth;
     const tigerScale = tigerWidth / this.tiger.texture.width;
 
     this.tiger.scale.set(tigerScale);
 
     this.tiger.position.set(
-      (this.layout.designWidth - this.tiger.width) / 2,
-      (this.layout.designHeight - this.tiger.height) / 2 +
-        this.layout.tigerHeightOffset
+      (layout.designWidth - this.tiger.width) / 2,
+      (layout.designHeight - this.tiger.height) / 2 +
+        layout.tigerHeightOffset
     );
 
-    const winTextWidth = this.layout.winTextWidth;
+    const winTextWidth = layout.winTextWidth;
     const winTextScale = winTextWidth / this.winText.texture.width;
 
     this.winText.scale.set(winTextScale);
 
     this.winText.position.set(
-      (this.layout.designWidth - this.winText.width) / 2,
-      (this.layout.designHeight - this.winText.height) / 2 +
-        this.layout.winTextHeightOffset
+      (layout.designWidth - this.winText.width) / 2,
+      (layout.designHeight - this.winText.height) / 2 +
+        layout.winTextHeightOffset
     );
 
     this.winAnimation = new WinAnimation(this.tiger, this.winText);
 
-    const plateScale = this.layout.plateHeight / this.plate.texture.height;
+    const plateScale = layout.plateHeight / this.plate.texture.height;
     this.plate.scale.set(plateScale);
 
     this.plate.position.set(
-      this.layout.plateLeftOffset,
-      (this.layout.designHeight - this.plate.height) / 2
+      layout.plateLeftOffset,
+      (layout.designHeight - this.plate.height) / 2
     );
 
     this.progressMeter.position.set(
-      this.plate.x + this.plate.width * 0.35,
-      this.plate.y + this.plate.height * 0.25
+      this.plate.x + this.plate.width * layout.progressMeterHorizontal,
+      this.plate.y + this.plate.height * layout.progressMeterVertical
     );
 
     const cageLeft = this.cage.x;
     const cageTop = this.cage.y;
     const cageHeight = this.cage.height;
 
-    const barWidth = cageWidth * this.layout.barWidthRatio;
+    const barWidth = cageWidth * layout.barWidthRatio;
 
-    const leftX = cageLeft + cageWidth * this.layout.leftBarXRatio;
-    const rightX = cageLeft + cageWidth * this.layout.rightBarXRatio;
+    const leftX = cageLeft + cageWidth * layout.leftBarXRatio;
+    const rightX = cageLeft + cageWidth * layout.rightBarXRatio;
 
     const rowYPositions = [
-      cageTop + cageHeight * this.layout.barRowYRatios[0],
-      cageTop + cageHeight * this.layout.barRowYRatios[1],
-      cageTop + cageHeight * this.layout.barRowYRatios[2],
+      cageTop + cageHeight * layout.barRowYRatios[0],
+      cageTop + cageHeight * layout.barRowYRatios[1],
+      cageTop + cageHeight * layout.barRowYRatios[2],
     ];
 
-    for (let i = 0; i < this.layout.barCount; i++) {
+    for (let i = 0; i < layout.barCount; i++) {
       const leftBar = new Bar();
       leftBar.setSize(barWidth);
       leftBar.setNumber(i + 1);
@@ -166,7 +148,7 @@ export default class Game extends Scene {
       this.gameContainer.addChild(leftBar);
     }
 
-    for (let i = 0; i < this.layout.barCount; i++) {
+    for (let i = 0; i < layout.barCount; i++) {
       const rightBar = new Bar();
       rightBar.setSize(barWidth);
       rightBar.setNumber(i + 4, true);
@@ -195,10 +177,9 @@ export default class Game extends Scene {
   onResize(width: number, height: number) {
     if (!this.background) return;
 
-    // Background covers the viewport.
     const backgroundScale = Math.max(
-      width / this.layout.designWidth,
-      height / this.layout.designHeight
+      width / layout.designWidth,
+      height / layout.designHeight
     );
 
     this.background.scale.set(backgroundScale);
@@ -208,15 +189,14 @@ export default class Game extends Scene {
       (height - this.background.height) / 2
     );
 
-    // Game container occupies 58% of the viewport width.
-    const containerWidth = width * this.layout.gameAreaWidthRatio;
-    const containerScale = containerWidth / this.layout.designWidth;
+    const containerWidth = width * layout.gameAreaWidthRatio;
+    const containerScale = containerWidth / layout.designWidth;
 
     this.gameContainer.scale.set(containerScale);
 
     this.gameContainer.position.set(
-      (width - this.layout.designWidth * containerScale) / 2,
-      (height - this.layout.designHeight * containerScale) / 2
+      (width - layout.designWidth * containerScale) / 2,
+      (height - layout.designHeight * containerScale) / 2
     );
   }
 }

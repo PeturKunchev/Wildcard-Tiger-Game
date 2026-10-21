@@ -1,21 +1,24 @@
+
 import gsap from "gsap";
 import { Container, Sprite, Text } from "pixi.js";
+import { barConfig } from "../config/barConfig";
 
 export default class Bar extends Container {
   private shadow: Sprite;
   private bar: Sprite;
   private label: Text;
   private originalX = 0;
-  private readonly shadowOffset = 12;
+
   constructor() {
     super();
 
     this.shadow = Sprite.from("barShadow");
     this.bar = Sprite.from("bar");
+
     this.label = new Text("", {
-      fontFamily: "Arial",
-      fontSize: 35,
-      fill: "red",
+      fontFamily: barConfig.labelFontFamily,
+      fontSize: barConfig.labelFontSize,
+      fill: barConfig.labelColor,
       fontWeight: "bold",
     });
 
@@ -23,6 +26,7 @@ export default class Bar extends Container {
     this.addChild(this.shadow, this.bar);
     this.addChild(this.label);
   }
+
   setOriginalPosition() {
     this.originalX = this.x;
   }
@@ -31,13 +35,14 @@ export default class Bar extends Container {
     this.eventMode = clickable ? "static" : "none";
     this.cursor = clickable ? "pointer" : "default";
   }
+
   setSize(width: number) {
     const scale = width / this.bar.texture.width;
 
     this.bar.scale.set(scale);
     this.shadow.scale.set(scale);
 
-    this.shadow.position.set(0, this.shadowOffset);
+    this.shadow.position.set(0, barConfig.shadowOffset);
     this.bar.position.set(0, 0);
   }
 
@@ -56,7 +61,7 @@ export default class Bar extends Container {
   setNumber(number: number, flipped = false) {
     this.label.text = String(number);
 
-    const endPadding = this.bar.width * 0.07;
+    const endPadding = this.bar.width * barConfig.labelEndPaddingRatio;
 
     this.label.position.set(
       flipped ? this.bar.width - endPadding : endPadding,
@@ -65,27 +70,27 @@ export default class Bar extends Container {
   }
 
   setOnClick(callback: () => void) {
-    this.setClickable(true)
-    this.eventMode = "static";
-    this.cursor = "pointer";
+    this.setClickable(true);
     this.on("pointertap", callback);
   }
+
   open(distance: number): Promise<void> {
     return new Promise((resolve) => {
       gsap.to(this, {
         x: this.x + distance,
-        duration: 0.6,
-        ease: "power2.inOut",
+        duration: barConfig.openingDuration,
+        ease: barConfig.openingEase,
         onComplete: resolve,
       });
     });
   }
+
   close(): Promise<void> {
     return new Promise((resolve) => {
       gsap.to(this, {
         x: this.originalX,
-        duration: 0.6,
-        ease: "power2.inOut",
+        duration: barConfig.closingDuration,
+        ease: barConfig.closingEase,
         onComplete: resolve,
       });
     });
