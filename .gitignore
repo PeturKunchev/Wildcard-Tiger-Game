@@ -428,7 +428,5 @@ FodyWeavers.xsd
 #*.lscache
 
 
-package-lock.json
-package.json
 node_modules
 *.pdf
