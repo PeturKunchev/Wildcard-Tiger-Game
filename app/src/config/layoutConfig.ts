@@ -1,0 +1,21 @@
+export const layout = {
+  designWidth: 1280,
+  designHeight: 720,
+  gameAreaWidthRatio: 0.55,
+  cageWidth: 1200,
+  tigerHeightOffset: 80,
+  tigerWidth: 800,
+  plateHeight: 750,
+  plateLeftOffset: -450,
+  barCount: 3,
+  barWidthRatio: 0.34,
+  leftBarXRatio: 0.13,
+  rightBarXRatio: 0.53,
+  barRowYRatios: [0.35, 0.55, 0.75],
+  winTextWidth: 1600,
+  winTextHeightOffset: 350,
+  progressMeterHorizontal: 0.35,
+  progressMeterVertical: 0.25,
+  wrongBarPercentageOpen: 0.25,
+} as const;
+

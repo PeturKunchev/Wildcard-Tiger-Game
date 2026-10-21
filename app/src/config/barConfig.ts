@@ -1,0 +1,15 @@
+export const barConfig = {
+  shadowOffset: 12,
+  labelFontSize: 35,
+  labelColor: "red",
+  labelFontFamily: "Arial",
+  labelEndPaddingRatio: 0.07,
+  openingDuration: 0.6,
+  openingEase: "power2.inOut",
+  closingDuration: 0.6,
+  closingEase: "power2.inOut",
+  progressBarWidth: 160,
+  progressBarHeight: 50,
+  progressBarGap: 10,
+  progressBarCount: 6,
+} as const;
