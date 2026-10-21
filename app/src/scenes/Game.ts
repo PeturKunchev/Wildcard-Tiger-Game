@@ -20,7 +20,6 @@ export default class Game extends Scene {
   private gameContainer = new Container();
   private gameLogic = new GameLogic();
 
-
   private async resetBars() {
     this.progressMeter?.setProgress(0);
     await Promise.all(this.openedBars.map((bar) => bar.close()));
@@ -90,8 +89,7 @@ export default class Game extends Scene {
 
     this.tiger.position.set(
       (layout.designWidth - this.tiger.width) / 2,
-      (layout.designHeight - this.tiger.height) / 2 +
-        layout.tigerHeightOffset
+      (layout.designHeight - this.tiger.height) / 2 + layout.tigerHeightOffset
     );
 
     const winTextWidth = layout.winTextWidth;
@@ -175,7 +173,10 @@ export default class Game extends Scene {
   }
 
   onResize(width: number, height: number) {
-    if (!this.background) return;
+    if (!this.background || !this.cage || !this.plate) return;
+
+    const isMobile = width < layout.mobileBreakpoint;
+    const isPortrait = height > width;
 
     const backgroundScale = Math.max(
       width / layout.designWidth,
@@ -183,20 +184,47 @@ export default class Game extends Scene {
     );
 
     this.background.scale.set(backgroundScale);
-
     this.background.position.set(
       (width - this.background.width) / 2,
       (height - this.background.height) / 2
     );
 
-    const containerWidth = width * layout.gameAreaWidthRatio;
-    const containerScale = containerWidth / layout.designWidth;
+    const widthRatio = isMobile
+      ? layout.mobileGameAreaWidthRatio
+      : layout.gameAreaWidthRatio;
 
-    this.gameContainer.scale.set(containerScale);
+    const scale = Math.min(
+      (width * widthRatio) / layout.designWidth,
+      height / layout.designHeight
+    );
 
+    this.gameContainer.scale.set(scale);
     this.gameContainer.position.set(
-      (width - layout.designWidth * containerScale) / 2,
-      (height - layout.designHeight * containerScale) / 2
+      (width - layout.designWidth * scale) / 2,
+      (height - layout.designHeight * scale) / 2
+    );
+
+    const plateHeight = isMobile
+      ? layout.mobilePlateHeight
+      : layout.plateHeight;
+
+    this.plate.scale.set(plateHeight / this.plate.texture.height);
+
+    if (isMobile && isPortrait) {
+      this.plate.position.set(
+        layout.mobilePlateLeftOffset,
+        this.cage.y + this.cage.height + layout.mobileVerticalGap
+      );
+    } else {
+      this.plate.position.set(
+        isMobile ? layout.mobilePlateLeftOffset : layout.plateLeftOffset,
+        (layout.designHeight - this.plate.height) / 2
+      );
+    }
+
+    this.progressMeter?.position.set(
+      this.plate.x + this.plate.width * layout.progressMeterHorizontal,
+      this.plate.y + this.plate.height * layout.progressMeterVertical
     );
   }
 }

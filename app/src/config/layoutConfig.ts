@@ -17,5 +17,9 @@ export const layout = {
   progressMeterHorizontal: 0.35,
   progressMeterVertical: 0.25,
   wrongBarPercentageOpen: 0.25,
+  mobileBreakpoint: 700,
+  mobileGameAreaWidthRatio: 0.95,
+  mobilePlateHeight: 650,
+  mobilePlateLeftOffset: 400,
+  mobileVerticalGap: 80,
 } as const;
-
